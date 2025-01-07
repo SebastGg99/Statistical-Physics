@@ -1,0 +1,17 @@
+0. ABSTRACT:
+
+En el artículo se explora un sistema muy claro: Partícula en caja 1D (Pozo de Potencial Infinito), teniendo en 
+cuenta los efectos de la interacción térmica con un reservoir de partículas con Temperatura diferente de cero.
+Después, se considera un sistema de dos partículas sin spin, distinguiendo entre bosones y fermiones (s = 0), y
+posteriormente se considera un sistema en que el fermión tiene spin 1/2, notándose grandes diferencias, pues en 
+el caso de una partícula se encuentra que la f.d.p.  es uniforme a medida que la temperatura aumenta, excepto en
+los bordes de a caja. Por otro lado, la función de onda total para el caso con spin difiere mucho del caso sin spin,
+concluyendo que las simplificaciones pueden llevar a resultados engañosos.
+---------------------------------------------------------------------------------------------------------------------
+
+1. INTRODUCCIÓN:
+
+Se estudia el comportamiento de un sistema cuántico compuesto por un pozo infinito de potencial (hueco) en contacto
+con un baño térmico con tempertaura no nula. Iniciamos obteniendo la función de onda termalizada. Esto se hace 
+comenzando con la solución de auto-estados de la caja cuántica simple, y añadimos el factor de Boltzmann que da 
+cuenta de la energía térmica. (Factor: exp(-En/kT))
