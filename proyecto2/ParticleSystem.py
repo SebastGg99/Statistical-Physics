@@ -6,7 +6,7 @@ from scipy.optimize import root_scalar
 class infiniteBox:
     """
     Clase que simula un sistema de dos partículas bosónicas o fermiónicas (o una sola partícula) y calcula probabilidades, funciones de onda,
-    factores de Boltzmann y distribuciones térmicas, en función de la temperatura y otros parámetros físicos.
+    factores de Boltzmann y distribuciones térmicas, en función de la temperatura y otros parámetros físicos, para el caso de un potencial infinito.
     
     Atributos:
     ----------
@@ -177,13 +177,41 @@ class infiniteBox:
         return Total
     
 class finiteBox:#(infiniteBox):
+    """
+    Clase que simula un sistema de dos partículas bosónicas o fermiónicas (o una sola partícula) y calcula probabilidades, funciones de onda,
+    factores de Boltzmann y distribuciones térmicas, en función de la temperatura y otros parámetros físicos, para el caso de un potencial finito.
+    
+    Atributos:
+    ----------
+    temperatura : float
+        Temperatura adimensional del sistema.
+    """
+    
     def __init__(self, t):
         # super().__init__(t)
         t=0
         self.temperatura = t
     
     def find_roots(self, f, R_a, symmetry):
-        # Detectar si un valor está cerca de una asíntota vertical de tan(alpha)
+        """
+        Encuentra las raíces de la ecuación trascendental en un rango dado, considerando la simetría.
+
+        Parámetros:
+        -----------
+        f : function
+            Forma funcional de la ecuación trascendental.
+        R_a : float
+            El rango en el cual buscar las raíces.
+        symmetry : bool
+            Indica si se considera el caso simétrico (True) o el asntiimétrico (False).
+
+        Retorna:
+        --------
+        roots: list
+            Una lista de las raíces encontradas en el rango seleccionado.
+        """
+        
+        #Detectar si un valor está cerca de una asíntota vertical de tan(alpha)
         def is_near_asymptote(alpha, threshold=0.1):
             if symmetry:
                 return np.any(np.isclose(alpha, (np.pi / 2) + np.pi * np.arange(0, 10), atol=threshold))
@@ -243,6 +271,27 @@ class finiteBox:#(infiniteBox):
         #     print(f"Raíz {i}: α_n = {root:.6f}")
     
     def phi(self, A, a, u, x, symmetry):
+        """
+        Calcula la función phi en diferentes tramos dependiendo de la simetría.
+
+        Parámetros:
+        -----------
+        A : float
+            Amplitud de la función.
+        a : float
+            Parámetro de la función.
+        u : float
+            Parámetro de la función.
+        x : float
+            Variable independiente (posición).
+        symmetry : bool
+            Indica si se considera el caso simétrico (True) o el antisimétrico (False).
+
+        Retorna:
+        --------
+        function
+            La función phi calculada.
+        """
         
         def outside(x, side="l"):
             if side == "l":
@@ -271,6 +320,30 @@ class finiteBox:#(infiniteBox):
         return func
 
     def psi(self, A, a, u, x, mode, symmetry):
+        """
+        Calcula la función de onda psi para bosones o fermiones, considerando la simetría.
+
+        Parámetros:
+        -----------
+        A : float
+            Amplitud de la función.
+        a : list
+            Lista de parámetros de la función.
+        u : float
+            Parámetro de la función.
+        x : list
+            Lista de variables independientes (posiciones).
+        mode : str
+            Modo de la partícula ('boson' o 'fermion').
+        symmetry : bool
+            Indica si se considera la simetría en el cálculo.
+
+        Retorna:
+        --------
+        function
+            La función de onda psi calculada dependiendo del caso.
+        """
+        
         #c = np.sqrt(1/2) #Factor de normalización
         #Para el caso simétrico
         term1 = self.phi(A, a[0], u, x[0], symmetry) * self.phi(A, a[1], u, x[1], symmetry) #Primer término de autofunciones
@@ -289,7 +362,32 @@ class finiteBox:#(infiniteBox):
         return Total #Se retorna la función de onda correspondiente, dependiendo del caso
     
     def P(self, A, a, u, x, mode, symmetry, spin=False):
-        
+        """
+        Calcula la probabilidad P en función de la función de onda psi, considerando el spin.
+
+        Parámetros:
+        -----------
+        A : float
+            Amplitud de la función.
+        a : list
+            Lista de parámetros de la función.
+        u : float
+            Parámetro de la función.
+        x : list
+            Lista de variables independientes (posiciones).
+        mode : str
+            Modo de la partícula ('boson' o 'fermion').
+        symmetry : bool
+            Indica si se considera la simetría en el cálculo.
+        spin : bool, opcional
+            Indica si se considera el spin en el cálculo (por defecto es False).
+
+        Retorna:
+        --------
+        float
+            La probabilidad P calculada.
+        """
+
         #Caso simétrico
         # if symmetry:
         if spin == False: #Si NO se considera el spin...
@@ -299,7 +397,7 @@ class finiteBox:#(infiniteBox):
             term2 = self.psi(A, a, u, x, 'fermion', symmetry) * self.psi(A, a, u, x, 'fermion', symmetry) / 2 #La parte antisimétrica
             p = (term1 / 4) + (3 * term2 / 4) #Y sus contribuciones a la probabilidad
 
-        # #Caso asimétrico
+        # #Caso antisimétrico
         # else:
         #     if spin == False: #Si NO se considera el spin...
         #         p = self.psi(A, a, u, x, mode, spin, ) * self.psi(A, a, u, x, mode) #...La probabilidad será el modulo al cuadrado de la función de onda
@@ -315,16 +413,77 @@ class finiteBox:#(infiniteBox):
         pass
 
     def P_th(self, x, nmax, mode='default', spin=False):
+        """
+        Calcula la probabilidad térmica P_th para un estado dado.
+
+        Parámetros:
+        -----------
+        x : float
+            Variable independiente.
+        nmax : int
+            Número máximo de estados considerados.
+        mode : str, opcional
+            Modo de la partícula (por defecto es 'default').
+        spin : bool, opcional
+            Indica si se considera el spin en el cálculo (por defecto es False).
+
+        Retorna:
+        --------
+        float
+            La probabilidad térmica P_th calculada.
+        """
         pass
 
 
 
 class Plotter:
+    """
+    Clase que representa un generador de gráficos para funciones en una o dos dimensiones.
+
+    Atributos:
+    ----------
+    dimension : int
+        La dimensión del gráfico (1 o 2).
+    titulo : str
+        El título del gráfico.
+
+    Métodos:
+    --------
+    plot(x, f, x_size, y_size, xlabel, ylabel, label='', elev=0, azim=0, z_lim=0):
+        Genera y muestra un gráfico de la función o funciones dadas.
+    """
+    
     def __init__(self, dim, title):
         self.dimension = dim
         self.titulo = title
 
     def plot(self, x, f, x_size, y_size, xlabel, ylabel, label ='', elev=0, azim=0, z_lim=0):
+        """
+        Método que genera y muestra un gráfico de la función o funciones dadas.
+
+        Parámetros:
+        -----------
+        x : array-like
+            Los valores del eje x.
+        f : array-like o list de array-like
+            La(s) función(es) a graficar.
+        x_size : float
+            El tamaño del gráfico en el eje x.
+        y_size : float
+            El tamaño del gráfico en el eje y.
+        xlabel : str o list de str
+            La etiqueta del eje x (o etiquetas en el caso de gráficos 2D).
+        ylabel : str
+            La etiqueta del eje y.
+        label : str o list de str, opcional
+            La(s) etiqueta(s) de la(s) función(es) (por defecto es '').
+        elev : float, opcional
+            La elevación de la vista en gráficos 2D (por defecto es 0).
+        azim : float, opcional
+            El ángulo azimutal de la vista en gráficos 2D (por defecto es 0).
+        z_lim : float, opcional
+            El límite del eje z en gráficos 2D (por defecto es 0).
+        """
         
         if self.dimension == 1:
 
